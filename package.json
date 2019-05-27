@@ -1,0 +1,22 @@
+{
+    "name": "profile-edit",
+    "version": "1.0.0",
+    "description": "with this feature a user is able to edit his profile",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "(https://github.com/smithr002/Profile-editing.git)"
+    },
+    "keywords": [
+    "profile"
+  ],
+    "author": "Robyn Smith",
+    "license": "ISC",
+    "dependencies": {
+        "data-inputjs": "^1.0.7",
+        "express": "^4.16.4"
+    }
+}
