@@ -2,26 +2,29 @@
 const express = require('express')
 const path = require('path');
 const mongo = require('mongodb').MongoClient
+const EJSON = require('mongodb-extjson')
+const BSON = require('bson-ext')
 const mongoose = require('mongoose')
 const assert = require('assert')
 const bodyParser = require('body-parser')
-
+const expressValidator = require('express-validator');
+const session = require('express-session');
+const passport = require('passport');
+const api = express.Router();
 const app = express()
+console.log('starting')
 
 //creating url for mongodb
-mongoose.connect = ('mongodb://localhost:/nodekb')
+mongoose.connect = ('mongodb://localhost:27017/bodybuddies', {useNewUrlParser: true})
 let db = mongoose.connection
+
+//check for db errors
+db.on('error',console.error.bind(console, 'connection error'))
 
 //check connection
 db.once('open', () =>{
     console.log('connected to MongoBD')
 })
-
-//check for db errors
-db.on('error', (err) => {
-    console.log(err)
-})
-
 //sets view engine to ejs
 app.set('view engine', 'ejs')
 
@@ -32,62 +35,31 @@ app.use(express.static('public'))
 app.get('/', (req, res) => res.render('index'))
 app.get('/login', (req, res) => res.render('login'))
 app.get('/signup', (req, res) => res.render('signup'))
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(expressValidator())
+
 
 const users = require('./routes/users')
 app.use('/users', users)
 
-// app.get('/get-data', (req, res) => {
-// const resultArray = []
-// mongo.connect(url, (err, db) => {
-//     assert.equal(null, err)
-//     const getting = db.collection('usersbb').find()
-//     getting.foreach((doc,err) => {
-//         assert.equal(null, err)
-//         resultArray.push(doc)
-//     }, () => {
-//         db.close()
-//         res.render('index', {user: resultArray})
-//     })
-// })
-// })
-
-// app.post('/insert', (req, res) => {
-//     console.log(req)
-// const user = {
-//     name: req.body.name,
-//     email: req.body.email,
-//     birthdate: req.body.birthdate
-// }
-
-// mongo.connect(url, (err, db) => {
-//     assert.equal(null, err)
-//     db.collection('usersbb').insertOne(user, (err, result) => {
-//         assert.equal(null, err)
-//         console.log('item inserted')
-//         db.close()
-//     })
-// })
-
-// res.redirect('/')
-// })
-
-// app.post('/update', (req, res) => {
-    
-// })
-
-// app.post('/delete', (req, res) => {
-    
-// })
-// //adding variables
-// app.get('/', (req, res) => {
-
-//     const tagline = "Any code of your own that you haven't looked at for six or more months might as well have been written by someone else.";
-
-//     res.render('pages/index', {
-//         drinks: drinks,
-//         tagline: tagline
-//     });
-// });
+//validator
+app.use(expressValidator({
+    errorFormatter: function(param, msg, value) {
+        var namespace = param.split('.')
+        , root    = namespace.shift()
+        , formParam = root;
+  
+      while(namespace.length) {
+        formParam += '[' + namespace.shift() + ']';
+      }
+      return {
+        param : formParam,
+        msg   : msg,
+        value : value
+      };
+    }
+  }));
 
 app.listen(3000)
 console.log('3000 is the magic port')
