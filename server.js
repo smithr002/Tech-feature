@@ -1,30 +1,58 @@
+require('dotenv').config()
+
+
 // load the extensions we need
 const express = require('express')
-const path = require('path');
+const path = require('path')
 const mongo = require('mongodb').MongoClient
-const EJSON = require('mongodb-extjson')
-const BSON = require('bson-ext')
 const mongoose = require('mongoose')
 const assert = require('assert')
 const bodyParser = require('body-parser')
-const expressValidator = require('express-validator');
+const expressValidator = require('express-validator')
 const session = require('express-session');
 const passport = require('passport');
 const api = express.Router();
 const app = express()
 console.log('starting')
 
+let db = null
+const url = 'mongodb://' + process.env.DB_HOST + ':' + process.env.DB_PORT
+
 //creating url for mongodb
-mongoose.connect = ('mongodb://localhost:27017/bodybuddies', {useNewUrlParser: true})
-let db = mongoose.connection
+mongo.connect(url, function(err, client) {
+    console.log('connected successfully')
+    db = client.db(process.env.DB_NAME)
+    db.collection('users').find().toArray(done)
+    function done (err, data) {
+        if (err) {
+            next(err)
+        } else {
+            console.log(data)
+        }
+    }
+})
+
+// mongo.connect = ( url , (err, client) =>{
+//     console.log('connected successfully')
+//     db = client.db(process.env.DB_NAME)
+    // db.collection('users').find().toArray(done)
+    // function done (err, data) {
+    //     if (err) {
+    //         next(err)
+    //     } else {
+    //         console.log(data)
+    //     }
+    // }
+// } 
+// )
 
 //check for db errors
-db.on('error',console.error.bind(console, 'connection error'))
+// db.on('error',console.error.bind(console, 'connection error'))
 
 //check connection
-db.once('open', () =>{
-    console.log('connected to MongoBD')
-})
+// db.once('open', () =>{
+//     console.log('connected to MongoBD')
+// })
 //sets view engine to ejs
 app.set('view engine', 'ejs')
 
@@ -71,4 +99,7 @@ console.log('3000 is the magic port')
 
 //'Node.js + Express - Tutorial - Insert and Get Data with MongoDB' Academind 
 //https://www.youtube.com/watch?v=ZKwrOXl5TDI
+
+//'Node.js & Express From Scratch [Part 9] - User Registration' traversy media
+//https://youtu.be/CrAU8xTHy4M
 
